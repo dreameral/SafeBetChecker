@@ -1,14 +1,16 @@
 import java.util.ArrayList;
+import java.util.Date;
 
 public class Event {
+  private final String home;
+  private final String away;
+  private final Date startTime;
+
   private League league;
   private Sport sport;
   private ArrayList<Site> sites;
-  private String home;
-  private String away;
-  private String startTime;
 
-  public Event(String home, String away, String startTime) {
+  public Event(String home, String away, Date startTime) {
     this.home = home;
     this.away = away;
     this.startTime = startTime;
@@ -27,10 +29,6 @@ public class Event {
     this.league = league;
   }
 
-  public Sport getSport() {
-    return sport;
-  }
-
   public void setSport(Sport sport) {
     this.sport = sport;
   }
@@ -39,24 +37,12 @@ public class Event {
     return home;
   }
 
-  public void setHome(String home) {
-    this.home = home;
-  }
-
   public String getAway() {
     return away;
   }
 
-  public void setAway(String away) {
-    this.away = away;
-  }
-
-  public String getStartTime() {
+  public Date getStartTime() {
     return startTime;
-  }
-
-  public void setStartTime(String startTime) {
-    this.startTime = startTime;
   }
 
   public int getSitesCount() {return sites.size();}

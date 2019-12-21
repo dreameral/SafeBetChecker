@@ -1,29 +1,43 @@
-import netscape.javascript.JSObject;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 
 public class Main {
 
-  public static void main(String[] args) throws IOException {
+  /**
+   * @param args The arguments expected are, the ApiKey, and a list with the bookmakers user wants to search odds on.
+   * @throws IOException
+   */
+  public static void main(String[] args) throws IOException, ParseException {
+    String apiKey = args[0];
+    String[] bookmakers = Utilities.removeElement(args, 0);
 
     Utilities.setProxy();
 
-    URL url = new URL(StaticVairables.BASE_URL);
-    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-    connection.setRequestMethod("GET");
+    JSONArray jsonArray = new JSONArray(executeGetRequest(StaticVariables.BASE_URL + "?apikey=" + apiKey));
+    ArrayList<Event> events = getEvents(jsonArray, bookmakers);
 
-    JSONArray jsonArray = new JSONArray(executeGetRequest());
+    for (Event event : events) {
+      if (event.getSitesCount() > 2) {
+        // we need at least three bookmakers to calculate three possible results (1, X, 2)
+        Utilities.calculateEvent1X2(event);
+      }
+    }
+  }
+
+  public static ArrayList<Event> getEvents(JSONArray jsonArray, String[] bookmakers) throws ParseException {
+    ArrayList<Event> events = new ArrayList<>();
 
     for (int i = 0; i < jsonArray.length(); i++) {
       JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -35,22 +49,31 @@ public class Main {
       Sport sport = new Sport(sportObject.getString("key"), sportObject.getString("name"));
 
       JSONObject eventObject = jsonObject.getJSONObject("event");
-      Event event = new Event(eventObject.getString("home"), eventObject.getString("away"), eventObject.getString("start_time"));
+      Date startDate = Utilities.getDate(eventObject.getString("start_time"));
+      if (!Utilities.isWithinDays(startDate, 7))
+        continue;
+
+      Event event = new Event(eventObject.getString("home"), eventObject.getString("away"), startDate);
       event.setLeague(league);
       event.setSport(sport);
 
       JSONObject sitesObject = jsonObject.getJSONObject("sites");
 
-      if (!sitesObject.has(StaticVairables.NODE_NAME_1X2))
+      if (!sitesObject.has(StaticVariables.NODE_NAME_1X2))
         continue;
 
-      JSONObject node1x2 = sitesObject.getJSONObject(StaticVairables.NODE_NAME_1X2);
+      JSONObject node1x2 = sitesObject.getJSONObject(StaticVariables.NODE_NAME_1X2);
 
-      Set bookmakers = node1x2.keySet();
-      Iterator it = bookmakers.iterator();
+      Set sites = node1x2.keySet();
+      Iterator it = sites.iterator();
 
       while (it.hasNext()) {
         String key = (String) it.next();
+
+        if (Utilities.indexOf(bookmakers, key) == -1) {
+          // continue in case the bookmaker found is not in the list of the bookmakers specified by the user.
+          continue;
+        }
 
         if (!(node1x2.get(key) instanceof JSONObject))
           continue;
@@ -72,15 +95,16 @@ public class Main {
         event.addSite(site);
       }
 
-      Utilities.calculateEvent(event);
+      events.add(event);
     }
 
+    return events;
   }
 
-  public static String executeGetRequest() throws IOException {
+  public static String executeGetRequest(String urlString) throws IOException {
     StringBuilder response = new StringBuilder();
 
-    URL url = new URL(StaticVairables.BASE_URL);
+    URL url = new URL(urlString);
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod("GET");
 

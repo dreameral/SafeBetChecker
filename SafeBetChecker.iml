@@ -12,5 +12,6 @@
     <orderEntry type="jdk" jdkName="11" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Maven: org.json:json:20190722" level="project" />
+    <orderEntry type="library" name="Maven: org.json:json:20190722" level="project" />
   </component>
 </module>
