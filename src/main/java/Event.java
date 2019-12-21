@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Vector;
 
 public class Event {
   private League league;
@@ -13,7 +12,7 @@ public class Event {
     this.home = home;
     this.away = away;
     this.startTime = startTime;
-    sites = new ArrayList<>();
+    sites = new ArrayList<Site>();
   }
 
   public void addSite(Site site) {
