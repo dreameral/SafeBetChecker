@@ -1,6 +1,6 @@
 public class Site {
-  private String name;
-  private Odds odds;
+  private final String name;
+  private final Odds odds;
 
   public Site(String name, Odds odds) {
     this.name = name;

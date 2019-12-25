@@ -19,14 +19,30 @@ public class Main {
    * @throws IOException
    */
   public static void main(String[] args) throws IOException, ParseException {
+    if (args.length == 0) {
+      System.out.println(StaticVariables.MISSING_ARGUMENTS);
+      return;
+    }
+
     String apiKey = args[0];
     String[] bookmakers = Utilities.removeElement(args, 0);
 
-    Utilities.setProxy();
+    boolean includeAll = false;
 
+    if (bookmakers.length == 0) {
+      System.out.println(StaticVariables.MISSING_ARGUMENTS);
+      return;
+    } else if (bookmakers[0].equals("*")) {
+      includeAll = true;
+    } else if (bookmakers.length < 3) {
+      System.out.println(StaticVariables.MISSING_ARGUMENTS);
+      return;
+    }
 
     JSONArray jsonArray = new JSONArray(executeGetRequest(StaticVariables.BASE_URL + "?apikey=" + apiKey));
-    ArrayList<Event> events = getEvents(jsonArray, bookmakers);
+    ArrayList<Event> events = getEvents(jsonArray, bookmakers, includeAll);
+
+    jsonArray = null;
 
     for (Event event : events) {
       if (event.getSitesCount() > 2) {
@@ -36,7 +52,7 @@ public class Main {
     }
   }
 
-  public static ArrayList<Event> getEvents(JSONArray jsonArray, String[] bookmakers) throws ParseException {
+  public static ArrayList<Event> getEvents(JSONArray jsonArray, String[] bookmakers, boolean includeAll) throws ParseException {
     ArrayList<Event> events = new ArrayList<>();
 
     for (int i = 0; i < jsonArray.length(); i++) {
@@ -70,7 +86,7 @@ public class Main {
       while (it.hasNext()) {
         String key = (String) it.next();
 
-        if (Utilities.indexOf(bookmakers, key) == -1) {
+        if (!includeAll && Utilities.indexOf(bookmakers, key) == -1) {
           // continue in case the bookmaker found is not in the list of the bookmakers specified by the user.
           continue;
         }

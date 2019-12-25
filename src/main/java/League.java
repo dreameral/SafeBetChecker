@@ -1,6 +1,6 @@
 public class League {
-  private String key;
-  private String name;
+  private final String key;
+  private final String name;
 
   public League(String key, String name) {
     this.key = key;

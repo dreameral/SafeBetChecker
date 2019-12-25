@@ -1,12 +1,12 @@
 public class Odds {
-  private double homeWins;
-  private double x;
-  private double awayWins;
+  private final double homeWins;
+  private final double x;
+  private final double awayWins;
 
   public Odds(double homeWins, double x, double awayWins) {
-    this.homeWins = homeWins;
-    this.awayWins = awayWins;
-    this.x = x;
+    this.homeWins = Utilities.formatDouble(homeWins);
+    this.awayWins = Utilities.formatDouble(awayWins);
+    this.x = Utilities.formatDouble(x);
   }
 
   public double getHomeWins() {

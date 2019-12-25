@@ -5,12 +5,13 @@ import java.util.Date;
 public class Utilities {
 
   public static void setProxy() {
+    // In case you want to capture the HTTPS requests with Fiddler call this method
     System.setProperty("http.proxyHost", "127.0.0.1");
     System.setProperty("https.proxyHost", "127.0.0.1");
     System.setProperty("http.proxyPort", "8888");
     System.setProperty("https.proxyPort", "8888");
-    System.setProperty("javax.net.ssl.trustStore", "C:\\Users\\user\\Documents\\Ennio\\Other\\Fiddler\\FiddlerKeyStore");
-    System.setProperty("javax.net.ssl.trustStorePassword", "123456");
+    System.setProperty("javax.net.ssl.trustStore", "{Location to the certificate}");
+    System.setProperty("javax.net.ssl.trustStorePassword", "");
   }
 
   public static void calculateEvent1X2(Event event) {
@@ -63,23 +64,29 @@ public class Utilities {
   }
 
   public static boolean calculateOdds(double odd1, double odd2, double odd3) {
-    double prob1 = 1 / odd1;
-    double prob2 = 1 / odd2;
-    double prob3 = 1 / odd3;
+    double prob1 = formatDouble(1 / odd1);
+    double prob2 = formatDouble(1 / odd2);
+    double prob3 = formatDouble(1 / odd3);
 
     double sum = prob1 + prob2 + prob3;
     return sum < 1;
   }
 
   public static void printSafeBet(Event event, Site homeWinsSite, Site xSite, Site awayWinsSite) {
-    double betOnHome = 10 / homeWinsSite.getHomeWins();
-    double betOnX = 10 / xSite.getX();
-    double betOnAway = 10 / awayWinsSite.getAwayWins();
-    double totalBet = formatDouble(betOnHome + betOnX + betOnAway);
+    double betOnHome = formatDouble(StaticVariables.TOTAL_BET / homeWinsSite.getHomeWins());
+    double betOnX = formatDouble(StaticVariables.TOTAL_BET / xSite.getX());
+    double betOnAway = StaticVariables.TOTAL_BET - (betOnHome + betOnX);
 
-    double profitX = betOnX * xSite.getX() - totalBet;
-    double profitHome = betOnHome * homeWinsSite.getHomeWins() - totalBet;
-    double profitAway = betOnAway * awayWinsSite.getAwayWins() - totalBet;
+    double profitX = Utilities.formatDouble(betOnX * xSite.getX()) - StaticVariables.TOTAL_BET;
+    double profitHome = Utilities.formatDouble(betOnHome * homeWinsSite.getHomeWins()) - StaticVariables.TOTAL_BET;
+    double profitAway = Utilities.formatDouble(betOnAway * awayWinsSite.getAwayWins()) - StaticVariables.TOTAL_BET;
+
+    if (profitHome < 0 || profitX < 0 || profitAway < 0) {
+      /*
+       In theory this should not happen, however since we format doubles throughout the program (losing decimal info), things can get messy and end up in these conditions
+       */
+      return;
+    }
 
     System.out.println("SAFE BET FOUND: ");
     System.out.println("LEAGUE: " + event.getLeague().getName());
