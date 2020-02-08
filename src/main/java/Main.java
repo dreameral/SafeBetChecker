@@ -29,14 +29,11 @@ public class Main {
 
     boolean includeAll = false;
 
-    if (bookmakers.length == 0) {
+    if (bookmakers.length == 0 || bookmakers.length < 3) {
       System.out.println(StaticVariables.MISSING_ARGUMENTS);
       return;
     } else if (bookmakers[0].equals("*")) {
       includeAll = true;
-    } else if (bookmakers.length < 3) {
-      System.out.println(StaticVariables.MISSING_ARGUMENTS);
-      return;
     }
 
     JSONArray jsonArray = new JSONArray(executeGetRequest(StaticVariables.BASE_URL + "?apikey=" + apiKey));
